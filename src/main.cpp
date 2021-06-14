@@ -1,6 +1,7 @@
 #include <stdafx.hpp>
 #include <fstream>
 #include <random>
+#include <cmdline.h>
 
 using namespace std;
 
@@ -31,40 +32,52 @@ bool isSorted(const std::vector<int>& trg, int nRow, int nCol){
 
 int main(int argc, char const *argv[]) {
 
-	int nRow = 5;
-	int nCol = 5;
+	cmdline::parser p;
+	p.add<int>("number", 'n', "mesh size", false, 5);
+	p.add("verbose", 'v', "display results");
+	p.add("help", 0, "print help");
 
-	// set up.
-	
+	if (!p.parse(argc, argv)||p.exist("help")){
+    std::cout<<p.error_full()<<p.usage();
+    return 0;
+  }
+
+	int nRow = p.get<int>("number");
+	int nCol = nRow;
+	bool verbose = p.exist("verbose");
+
+	// set up.	
 	std::vector<int> input;
-	if (argc > 1) {
-		nRow = nCol = atoi(argv[1]);
-	}
 	srand(time(0));
 	for (size_t i = 0; i < nRow*nCol; i++) {
 		input.push_back(i);
 	}
 	random_shuffle(input.begin(), input.end());
 
-	cout << "[org]" << endl;
-	printVec(input, nRow);
+	if (verbose) {
+		cout << "[org]" << endl;
+		printVec(input, nRow);
+	}
 
 	// sorting
 	int cnt = 1;
 	while (true) {
-		cout << "[Itr : " << cnt <<  "]" << endl;
+		if (verbose) {
+			cout << "[Itr : " << cnt <<  "]" << endl;
+		}
 
 		// randomize row.
-		cout << "[r step]" << endl;
 		for (size_t i = 0; i < nRow; i++) {
 			auto s = input.begin() + i*nCol;
 			auto e = s + nCol;
 			random_shuffle(s, e);
 		}
-		printVec(input, nRow);
+		if (verbose) {
+			cout << "[r step]" << endl;
+			printVec(input, nRow);
+		}
 
 		// sort column.
-		cout << "[c sort]" << endl;
 		for (size_t i = 0; i < nCol; i++) {
 			vector<int> col;
 			for (size_t r = 0; r < nRow; r++) {
@@ -75,10 +88,12 @@ int main(int argc, char const *argv[]) {
 				input[i+nCol*r] = col[r];
 			}
 		}
-		printVec(input, nRow);
+		if (verbose) {
+			cout << "[c sort]" << endl;
+			printVec(input, nRow);
+		}
 	
 		// shear.
-		cout << "[shear step]" << endl;
 		for (size_t i = 0; i < nRow; i++) {
 			auto s = input.begin() + i*nCol;
 			auto e = s + nCol;
@@ -89,12 +104,14 @@ int main(int argc, char const *argv[]) {
 				sort(s, e, greater<int>());
 			}
 		}
-		printVec(input, nRow);
+		if (verbose){
+			cout << "[shear step]" << endl;
+			printVec(input, nRow);
+		}
 
 		if (isSorted(input, nRow, nCol)) break;
 
 		// sort column.
-		cout << "[c sort]" << endl;
 		for (size_t i = 0; i < nCol; i++) {
 			vector<int> col;
 			for (size_t r = 0; r < nRow; r++) {
@@ -105,12 +122,16 @@ int main(int argc, char const *argv[]) {
 				input[i+nCol*r] = col[r];
 			}
 		}
-		printVec(input, nRow);
+		if (verbose){
+			cout << "[c sort]" << endl;
+			printVec(input, nRow);
+		}
 
 		cnt++;
 	}		
 
-	cout << "Complete by " << cnt << " itrs." << endl;
+	cout << "## row  col  itrs." << endl;
+	cout << nRow << " " << nCol << " " << cnt << endl;
 
 	return 0;
 }

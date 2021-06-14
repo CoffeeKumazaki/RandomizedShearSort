@@ -16,3 +16,11 @@ Considering n rows and m columns meth and sorting numbers in a major-row snake-l
 |  7  |  8  |  9  |  
 
 Sorting by this algorithm is expected to be finished within O(log log n) iterations.
+
+## build
+
+'''
+$ mkdir build; cd build;
+$ cmake ..
+$ make
+'''

@@ -19,8 +19,8 @@ Sorting by this algorithm is expected to be finished within O(log log n) iterati
 
 ## build
 
-'''
+```
 $ mkdir build; cd build;
 $ cmake ..
 $ make
-'''
+```
